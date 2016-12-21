@@ -27,11 +27,51 @@
  ***************************************************************************/ 
 
 #include "stm32f4_lis3dsh.h"
+
 #include <errno.h>
+#include "miosix.h"
 
 namespace miosix {
+    
+typedef Gpio<GPIOA_BASE,5> lis3dsh_CLK;
+typedef Gpio<GPIOA_BASE,6> lis3dsh_MOSI;
+typedef Gpio<GPIOA_BASE,7> lis3dsh_MISO;
+typedef Gpio<GPIOE_BASE,3> lis3dsh_CS;
+
+/**
+ * \internal
+ * Initialize GPIO Pins
+ */
+static void gpio_init()
+{
+    /* Enable GPIOA clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; 
+    
+    /* Configure CLK, MOSI, MISO pins, Alternate Function 5, speed 100MHz*/
+    lis3dsh_CLK::mode(Mode::ALTERNATE);
+    lis3dsh_CLK::alternateFunction(5);
+    lis3dsh_CLK::speed(Speed::_100MHz);
+    
+    lis3dsh_MOSI::mode(Mode::ALTERNATE);
+    lis3dsh_MOSI::alternateFunction(5);
+    lis3dsh_MOSI::speed(Speed::_100MHz);
+    
+    lis3dsh_MISO::mode(Mode::ALTERNATE);
+    lis3dsh_MISO::alternateFunction(5);
+    lis3dsh_MISO::speed(Speed::_100MHz);
+    
+    /* Enable GPIOE clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOEEN; 
+    
+    /* Configure CS pin, Output, speed 100MHz */
+    lis3dsh_CS::mode(Mode::OUTPUT);
+    lis3dsh_CS::speed(Speed::_100MHz);
+    lis3dsh_CS::high();
+}
 
 SPILIS3DSHDriver::SPILIS3DSHDriver() : Device(Device::TTY) {
+    
+    gpio_init();
 }
 
 intrusive_ref_ptr<SPILIS3DSHDriver> SPILIS3DSHDriver::instance() {
