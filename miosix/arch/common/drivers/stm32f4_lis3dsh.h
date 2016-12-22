@@ -44,6 +44,12 @@ namespace miosix {
 class SPILIS3DSHDriver : public Device
 {
 public:
+    enum Axes {
+        X = 0,
+        Y = 1,
+        Z = 2
+    };
+    
     /**
      * Constructor
      */

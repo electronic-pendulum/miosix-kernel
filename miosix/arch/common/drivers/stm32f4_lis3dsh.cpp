@@ -260,10 +260,33 @@ static inline int16_t high_low_to_int16(uint16_t high_low_value)
     return int16_value;
 }
 
+SPILIS3DSHDriver::SPILIS3DSHDriver() : Device(Device::TTY),
+    initialized(false), selected_axis(Axes::X) {
+    
+    int8_t reg_value;
     
     gpio_init();
     
     spi_init();
+    
+    /* get WHO AM I value */
+    reg_value = spi_read_reg(ADD_REG_WHO_AM_I);
+
+    /* if WHO AM I value is the expected one */
+    if (reg_value == UC_WHO_AM_I_DEFAULT_VALUE) {
+        /* set output data rate to 400 Hz and enable X,Y,Z axis */
+        spi_write_reg(ADD_REG_CTRL_4, UC_ADD_REG_CTRL_4_CFG_VALUE);
+        /* verify written value */
+        reg_value = spi_read_reg(ADD_REG_CTRL_4);
+        /* if written value is different */
+        if (reg_value != UC_ADD_REG_CTRL_4_CFG_VALUE) {
+            return;
+        }
+    } else {
+        return;
+    }
+    
+    initialized = true;
 }
 
 intrusive_ref_ptr<SPILIS3DSHDriver> SPILIS3DSHDriver::instance() {
