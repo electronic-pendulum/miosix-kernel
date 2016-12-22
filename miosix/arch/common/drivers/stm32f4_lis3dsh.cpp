@@ -33,6 +33,32 @@
 
 namespace miosix {
     
+/* ---------------- Local Defines ----------------- */
+
+/* LIS3DSH registers addresses */
+#define ADD_REG_WHO_AM_I			0x0F
+#define ADD_REG_CTRL_4				0x20
+#define ADD_REG_OUT_X_L				0x28
+#define ADD_REG_OUT_X_H				0x29
+#define ADD_REG_OUT_Y_L				0x2A
+#define ADD_REG_OUT_Y_H				0x2B
+#define ADD_REG_OUT_Z_L				0x2C
+#define ADD_REG_OUT_Z_H				0x2D
+
+#define ADD_REG_OFF_X                           0x10
+#define ADD_REG_OFF_Y                           0x11
+#define ADD_REG_OFF_Z                           0x12
+    
+/* WHO AM I register default value */
+#define UC_WHO_AM_I_DEFAULT_VALUE		0x3F
+
+/* ADD_REG_CTRL_4 register configuration value: X,Y,Z axis enabled and 400Hz of 
+ * output data rate */
+#define UC_ADD_REG_CTRL_4_CFG_VALUE		0x77
+
+/* Sensitivity for 2G range [mg/digit] */
+#define SENS_2G_RANGE_MG_PER_DIGIT		((float)0.06)    
+    
 /* ----------------- SPI Defines ----------------- */
     
 #define SPI_CR1_BAUDRATE_FPCLK_DIV_2	(0x00 << 3)
@@ -54,6 +80,18 @@ namespace miosix {
 #define SPI_CR1_DFF_16BIT               (1 << 11)
     
 #define SPI_CR1_MSBFIRST		(0 << 7)
+    
+/* ---------------- Local Macros ----------------- */
+
+/* set read single command. Attention: command must be 0x3F at most */
+#define SET_READ_SINGLE_CMD(x)			(x | 0x80)
+/* set read multiple command. Attention: command must be 0x3F at most */
+#define SET_READ_MULTI_CMD(x)			(x | 0xC0)
+/* set write single command. Attention: command must be 0x3F at most */
+#define SET_WRITE_SINGLE_CMD(x)			(x & (~(0xC0)))
+/* set write multiple command. Attention: command must be 0x3F at most */
+#define SET_WRITE_MULTI_CMD(x)			(x & (~(0x80))	\
+                                                 x |= 0x40)
     
 /* ------------------- Local Typedefs ------------------------*/
     
@@ -148,7 +186,80 @@ static void spi_init()
     spi_enable(SPI1);
 }
 
-SPILIS3DSHDriver::SPILIS3DSHDriver() : Device(Device::TTY) {
+static void spi_write(SPI_TypeDef* SPI, uint16_t data)
+{
+    /* Write data into DR. */
+    SPI->DR = data;
+}
+
+static uint16_t spi_read(SPI_TypeDef* SPI)
+{
+    /* Wait for transfer finished. */
+    while (!(SPI->SR & SPI_SR_RXNE));
+
+    /* Read the data from DR. */
+    return SPI->DR;
+}
+
+static uint16_t spi_xfer(SPI_TypeDef* SPI, uint16_t data)
+{
+    spi_write(SPI, data);
+
+    return spi_read(SPI);
+}
+
+/**
+ * \internal
+ * Function to write a register to LIS3DSH through SPI 
+ */
+static void spi_write_reg(uint8_t reg, uint8_t data)
+{
+    /* set CS low */
+    lis3dsh_CS::low();
+    
+    /* discard returned value */
+    spi_xfer(SPI1, SET_WRITE_SINGLE_CMD(reg));
+    spi_xfer(SPI1, data);
+    
+    /* set CS high */
+    lis3dsh_CS::high();
+}
+
+/**
+ * \internal
+ * Function to read a register from LIS3DSH through SPI
+ */
+static uint8_t spi_read_reg(uint8_t reg)
+{
+    uint8_t reg_value;
+    /* set CS low */
+    lis3dsh_CS::low();
+    reg_value = spi_xfer(SPI1, SET_READ_SINGLE_CMD(reg));
+    reg_value = spi_xfer(SPI1, 0xFF);
+    /* set CS high */
+    lis3dsh_CS::high();
+
+    return reg_value;
+}
+
+/**
+ * \internal
+ * Transform a two's complement value to 16-bit int value 
+ */
+static inline int16_t high_low_to_int16(uint16_t high_low_value)
+{
+    int16_t int16_value = 0;
+
+    /* conversion */
+    if (high_low_value > 32768) {
+        int16_value = -(((~high_low_value) & 0xFFFF) + 1);
+    } else {
+        int16_value = high_low_value;
+    }
+
+    return int16_value;
+}
+
     
     gpio_init();
     
