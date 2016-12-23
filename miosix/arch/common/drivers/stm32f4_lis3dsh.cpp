@@ -29,6 +29,7 @@
 #include "stm32f4_lis3dsh.h"
 
 #include <errno.h>
+#include <stdio.h>
 #include "miosix.h"
 
 namespace miosix {
@@ -260,6 +261,15 @@ static inline int16_t high_low_to_int16(uint16_t high_low_value)
     return int16_value;
 }
 
+//
+// class SPILIS3DSHDriver
+//
+const uint8_t SPILIS3DSHDriver::axis_reg_addr_array[AXES_NUM][2] = {
+    {ADD_REG_OUT_X_L, ADD_REG_OUT_X_H},
+    {ADD_REG_OUT_Y_L, ADD_REG_OUT_Y_H},
+    {ADD_REG_OUT_Z_L, ADD_REG_OUT_Z_H}
+};
+
 SPILIS3DSHDriver::SPILIS3DSHDriver() : Device(Device::TTY),
     initialized(false), selected_axis(Axes::X) {
     
@@ -297,16 +307,62 @@ intrusive_ref_ptr<SPILIS3DSHDriver> SPILIS3DSHDriver::instance() {
     return instance;
 }
     
-ssize_t SPILIS3DSHDriver::readBlock(void *buffer, size_t size, off_t where) {
-    return -ENOSYS;
-}
+
+ssize_t SPILIS3DSHDriver::readBlock(void *buffer, size_t size, off_t where) 
+{
+    if (size < 2) {
+        return -1;
+    }
     
-ssize_t SPILIS3DSHDriver::writeBlock(const void *buffer, size_t size, off_t where) {
-    return -ENOSYS;
-}
+    ssize_t bytes_read = 0;
+    int16_t* buffer_16 = (int16_t*) buffer;
+    while(size > 0) {
+        *buffer_16++ = _doReadAxis();
+        bytes_read += 2;
+        size -= 2;
+    }
     
+    return bytes_read;
+}
+
+ssize_t SPILIS3DSHDriver::writeBlock(const void *buffer, size_t size, 
+        off_t where) 
+{
+    if (size == 0) {
+        return -1;
+    }
+    
+    ssize_t bytes_written = 0;
+    const int8_t* buffer_8 = (const int8_t *) buffer;
+    while (size > 0) {
+        selected_axis = *buffer_8++;
+        size--;
+        bytes_written++;
+    }
+    iprintf("New selected axis = %d\n", selected_axis);
+    return bytes_written;
+}
+
 int SPILIS3DSHDriver::ioctl(int cmd, void *arg) {
     return -ENOSYS;
+}
+
+int16_t SPILIS3DSHDriver::_doReadAxis() {
+    int16_t mg_value = 0;
+
+    if (selected_axis < AXES_NUM) {
+        /* get 16-bit value */
+        mg_value = ((spi_read_reg(axis_reg_addr_array[selected_axis][1]) << 8) |
+                     spi_read_reg(axis_reg_addr_array[selected_axis][0]));
+
+        /* transform X value from two's complement to 16-bit int */
+        mg_value = high_low_to_int16(mg_value);
+
+        /* convert X absolute value to mg value */
+        mg_value = mg_value * SENS_2G_RANGE_MG_PER_DIGIT;
+    }
+    
+    return mg_value;
 }
 
 }

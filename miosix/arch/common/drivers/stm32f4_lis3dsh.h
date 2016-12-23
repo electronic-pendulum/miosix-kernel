@@ -35,9 +35,6 @@ namespace miosix {
     
 /* ---------------- Local Defines ----------------- */
     
-/* Number of axis */
-#define NUM_OF_AXIS				3
-
 /**
  * Driver for interfacing to an SD card through SPI
  */
@@ -47,7 +44,8 @@ public:
     enum Axes {
         X = 0,
         Y = 1,
-        Z = 2
+        Z = 2,
+        AXES_NUM
     };
     
     /**
@@ -68,8 +66,15 @@ public:
     virtual int ioctl(int cmd, void *arg);
     
 private:
+    
+    int16_t _doReadAxis();
+    
+    static const uint8_t axis_reg_addr_array[Axes::AXES_NUM][2];
      
     FastMutex mutex;
+    
+    bool initialized;
+    int8_t selected_axis;
 };
 
 } //namespace miosix
