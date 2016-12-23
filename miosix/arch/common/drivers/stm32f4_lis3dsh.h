@@ -66,6 +66,9 @@ public:
     virtual int ioctl(int cmd, void *arg);
     
 private:
+    static const int8_t OFF_Y = 10;
+    static const int8_t OFF_X = 15;
+    static const int8_t OFF_Z = 0;
     
     int16_t _doReadAxis();
     

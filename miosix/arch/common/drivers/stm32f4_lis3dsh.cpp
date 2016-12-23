@@ -296,6 +296,10 @@ SPILIS3DSHDriver::SPILIS3DSHDriver() : Device(Device::TTY),
         return;
     }
     
+    spi_write_reg(ADD_REG_OFF_X, OFF_X);
+    spi_write_reg(ADD_REG_OFF_Y, OFF_Y);
+    spi_write_reg(ADD_REG_OFF_Z, OFF_Z);
+    
     initialized = true;
 }
 
