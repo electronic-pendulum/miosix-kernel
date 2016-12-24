@@ -86,6 +86,8 @@ namespace miosix {
 /// Allows to enable/disable filesystem support to save code size
 /// By default it is defined (filesystem support is enabled)
 #define WITH_FILESYSTEM
+    
+#define WITH_ACCELEROMETER
 
 /// \def WITH_DEVFS
 /// Allows to enable/disable DevFs support to save code size

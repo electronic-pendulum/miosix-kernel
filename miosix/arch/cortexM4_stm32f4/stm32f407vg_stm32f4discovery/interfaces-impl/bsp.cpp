@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <inttypes.h>
 #include <sys/ioctl.h>
+#include <fcntl.h>
 #include "interfaces/bsp.h"
 #include "kernel/kernel.h"
 #include "kernel/sync.h"
@@ -45,6 +46,7 @@
 #include "filesystem/console/console_device.h"
 #include "drivers/serial.h"
 #include "drivers/sd_stm32f2_f4.h"
+#include "drivers/stm32f4_lis3dsh.h"
 #include "board_settings.h"
 
 namespace miosix {
@@ -84,7 +86,18 @@ void IRQbspInit()
 void bspInit2()
 {
     #ifdef WITH_FILESYSTEM
-    basicFilesystemSetup(SDIODriver::instance());
+    intrusive_ref_ptr<DevFs> devfs = basicFilesystemSetup(SDIODriver::instance());
+    
+    #ifdef WITH_ACCELEROMETER
+    bool accelFailed = false;
+    intrusive_ref_ptr<FileBase> accelFile;
+    bootlog("Initializing LIS3DSH Accelerometer to /dev/accel ... ");
+    devfs->addDevice("accel", SPILIS3DSHDriver::instance());
+    StringPart accel("accel");
+    if(devfs->open(accelFile,accel,O_RDWR,0)<0) accelFailed=true;
+    bootlog(accelFailed==0 ? "Ok\n" : "Failed\n");
+    #endif // WITH_ACCELEROMETER
+    
     #endif //WITH_FILESYSTEM
 }
 
