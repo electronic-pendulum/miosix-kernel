@@ -17,7 +17,7 @@ SUBDIRS := $(KPATH)
 ## List here your source files (both .s, .c and .cpp)
 ##
 SRC :=                                  \
-main.cpp
+main.cpp LengthCalculator.cpp
 
 ##
 ## List here additional static libraries with relative path
@@ -34,7 +34,7 @@ INCLUDE_DIRS :=
 ##############################################################################
 
 ifeq ("$(VERBOSE)","1")
-Q := 
+Q :=
 ECHO := @true
 else
 Q := @
