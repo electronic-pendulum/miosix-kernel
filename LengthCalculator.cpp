@@ -56,14 +56,21 @@ double LengthCalculator::getLength(int accY, int now) {
 
 //calculate length of the pendulum and set in the private property
 void LengthCalculator::calculateLength(int period, double theta) {
+    //period is in ms
+    //this is the inverse of the pendulum serie approximated to the second term
+    lastLength = G * pow(period / 1000.0, 2.0)/(4 * pow(M_PI, 2) * pow((1 + pow(theta, 2) / 16), 2));
 }
 
 //calculate the max theta of the current period
 double LengthCalculator::calculateTheta() {
-    return 0.0;
+    //0 is the vertical position
+    //the purpose of min is avoid NaN result of asin
+    //we don't need information about the side of the ependulum, for that reason we use abs
+    return 90.0 - asin(std::min(1.0, std::abs((double) minY / (SCALE * G)))) / M_PI * 180;
 }
 
 //calculate the current period (not yet finished)
 int LengthCalculator::calculatePeriod(int now) {
-    return 0;
+    //we have measured a quarter of a period
+    return (now - zeroTime) * 4;
 }
