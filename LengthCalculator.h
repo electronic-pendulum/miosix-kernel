@@ -36,12 +36,12 @@ public:
     LengthCalculator();
     LengthCalculator(const LengthCalculator& orig);
     virtual ~LengthCalculator();
-    double getLength(int acc, int now);
+    double getLength(int acc, long long now);
 
 private:
     void calculateLength(int period, double theta);
     double calculateTheta();
-    int calculatePeriod(int now);
+    int calculatePeriod(long long now);
 
 private:
     const int SCALE = 100;
@@ -51,8 +51,7 @@ private:
     bool decrementingY;
     int previousY;
     int minY;
-    int zeroTime;
-
+    long long zeroTime;
 };
 
 #endif /* LENGTHCALCULATOR_H */

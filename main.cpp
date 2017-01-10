@@ -52,20 +52,12 @@ int main()
 
     int16_t value;
     double length;
-    int time = 0;
-    // TODO: use getTick() instead of Timer
-    miosix::Timer timer;
-    timer.start();
 
     //loop that retrieves value of acceleroemer every 1 ms and prints the length calculated
     for(;;) {
         Thread::sleep(1);
         accelFile->read(&value, 2);
-        timer.stop();
-        time += timer.interval();
-        timer.clear();
-        timer.start();
-        length = calculator.getLength(value, time);
+        length = calculator.getLength(value, getTick());
         printf("Last length read: %f\n", length);
     }
 
