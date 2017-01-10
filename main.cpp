@@ -36,6 +36,9 @@
 
 using namespace miosix;
 
+//best value to have precision and speed, it was found in experimentally way 
+static const unsigned int DELAY = 30; // ms
+
 int main()
 {
     LengthCalculator calculator;
@@ -56,7 +59,7 @@ int main()
 
     //loop that retrieves value of acceleroemer every 1 ms and prints the length calculated
     for(;;) {
-        Thread::sleep(1);
+        Thread::sleep(DELAY);
         accelFile->read(&value, 2);
         length = calculator.getLength(value, getTick());
         if (length != previousLength) {
