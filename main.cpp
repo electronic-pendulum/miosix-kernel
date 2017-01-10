@@ -5,7 +5,7 @@
 #include <filesystem/stringpart.h>
 #include <filesystem/file_access.h>
 #include <kernel/sync.h>
-#include <miosix/arch/common/drivers/stm32f4_lis3dsh.h>
+#include <miosix/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery/drivers/stm32f4_lis3dsh.h>
 
 using namespace miosix;
 

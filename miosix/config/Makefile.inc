@@ -929,7 +929,7 @@ else ifeq ($(ARCH),cortexM4_stm32f4)
         ## These are the files in arch/<arch name>/<board name>
         ARCH_SRC :=                                  \
         arch/common/drivers/stm32f2_f4_i2c.cpp       \
-        arch/common/drivers/stm32f4_lis3dsh.cpp      \
+        arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery/drivers/stm32f4_lis3dsh.cpp      \
         arch/common/drivers/stm32_hardware_rng.cpp   \
         arch/common/drivers/servo_stm32.cpp          \
         $(BOARD_INC)/interfaces-impl/bsp.cpp
