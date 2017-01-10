@@ -51,14 +51,18 @@ int main()
     accelFile->write(&axis, 1); //set y as axis
 
     int16_t value;
-    double length;
+    double previousLength, length;
+    previousLength = -1.0;
 
     //loop that retrieves value of acceleroemer every 1 ms and prints the length calculated
     for(;;) {
         Thread::sleep(1);
         accelFile->read(&value, 2);
         length = calculator.getLength(value, getTick());
-        printf("Last length read: %f\n", length);
+        if (length != previousLength) {
+            printf("Last length read: %f\n", length);
+            previousLength = length;
+        }
     }
 
 }
