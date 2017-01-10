@@ -41,7 +41,7 @@ public:
 private:
     void calculateLength(int period, double theta);
     double calculateTheta();
-    int calculatePeriod(long long now);
+    int calculatePeriod();
 
 private:
     const int SCALE = 100;
@@ -52,6 +52,7 @@ private:
     int previousY;
     int minY;
     long long zeroTime;
+    long long previousTime;
 };
 
 #endif /* LENGTHCALCULATOR_H */

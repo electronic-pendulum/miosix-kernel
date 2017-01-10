@@ -32,7 +32,8 @@
 using namespace miosix;
 
 LengthCalculator::LengthCalculator() :
-    lastLength(-1.0), decrementingY(false), previousY(10000), minY(10000), zeroTime(0) {
+    lastLength(-1.0), decrementingY(false), previousY(10000), minY(10000),
+    zeroTime(0), previousTime(0) {
 }
 
 LengthCalculator::LengthCalculator(const LengthCalculator& orig) {
@@ -70,6 +71,7 @@ double LengthCalculator::getLength(int accY, int now) {
   }
 
   previousY = absAccY;
+  previousTime = now;
 
   return lastLength;
 }
@@ -92,7 +94,7 @@ double LengthCalculator::calculateTheta() {
 }
 
 //calculate the current period (not yet finished)
-int LengthCalculator::calculatePeriod(int now) {
+int LengthCalculator::calculatePeriod() {
     //we have measured a quarter of a period
-    return (now - zeroTime) * 4;
+    return (previousTime - zeroTime) * 4;
 }
