@@ -42,10 +42,38 @@ class SPILIS3DSHDriver : public Device
 {
 public:
     enum Axes {
-        X = 0,
-        Y = 1,
-        Z = 2,
-        AXES_NUM
+        X = 1,
+        Y = 2,
+        Z = 4,
+        AXES_NUM = 3
+    };
+    
+    
+    enum IoctlCmds {
+        CMD_INVALID = 0,
+        AXIS_SELECT,
+        OFFSETS_WRITE,
+        OFFSETS_READ
+    };
+    
+    struct Ioctl {
+        union {
+           struct {
+               Axes axis;
+           } axis_select;
+           struct {
+               int8_t axes;
+               union {
+                   unsigned int offsets;
+                   struct {
+                       unsigned char X;
+                       unsigned char Y;
+                       unsigned char Z;
+                       unsigned char padding;
+                   };
+               };
+           } offset;
+        };
     };
     
     /**
@@ -65,11 +93,7 @@ public:
     
     virtual int ioctl(int cmd, void *arg);
     
-private:
-    static const int8_t OFF_Y = 10;
-    static const int8_t OFF_X = 15;
-    static const int8_t OFF_Z = 0;
-    
+private:    
     int16_t _doReadAxis();
     
     static const uint8_t axis_reg_addr_array[Axes::AXES_NUM][2];

@@ -30,6 +30,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include "miosix.h"
 
 namespace miosix {
@@ -296,10 +297,6 @@ SPILIS3DSHDriver::SPILIS3DSHDriver() : Device(Device::TTY),
         return;
     }
     
-    spi_write_reg(ADD_REG_OFF_X, OFF_X);
-    spi_write_reg(ADD_REG_OFF_Y, OFF_Y);
-    spi_write_reg(ADD_REG_OFF_Z, OFF_Z);
-    
     initialized = true;
 }
 
@@ -332,23 +329,44 @@ ssize_t SPILIS3DSHDriver::readBlock(void *buffer, size_t size, off_t where)
 ssize_t SPILIS3DSHDriver::writeBlock(const void *buffer, size_t size, 
         off_t where) 
 {
-    if (size == 0) {
-        return -1;
-    }
-    
-    ssize_t bytes_written = 0;
-    const int8_t* buffer_8 = (const int8_t *) buffer;
-    while (size > 0) {
-        selected_axis = *buffer_8++;
-        size--;
-        bytes_written++;
-    }
-    iprintf("New selected axis = %d\n", selected_axis);
-    return bytes_written;
+    return -ENOSYS;
 }
 
 int SPILIS3DSHDriver::ioctl(int cmd, void *arg) {
-    return -ENOSYS;
+    Ioctl* ctl = reinterpret_cast<Ioctl*>(arg);
+    const char axes[] = { 'X', 'Y', 'Z' }; // save one byte ;)
+    switch(cmd) {
+        case AXIS_SELECT:
+            selected_axis = __builtin_ctz(ctl->axis_select.axis);
+            iprintf("New selected axis = %c\n", axes[selected_axis]);
+            return 0;
+        case OFFSETS_WRITE: {
+            int j = 0;
+            while(ctl->offset.axes > 0 && j < 3) {
+                if (ctl->offset.axes & (1 << j)) {
+                    unsigned char offset = (ctl->offset.offsets >> (j * 8)) & 0xFF;
+                    spi_write_reg(ADD_REG_OFF_X + j, offset);
+                    iprintf("New offset for axis %c = %" SCNd8 "\n", axes[j], offset);
+                }
+                ctl->offset.axes &= ~(1 << j);
+                j++;
+            }
+            return 0;
+        }
+        case OFFSETS_READ: {
+            int j = 0;
+            ctl->offset.offsets = 0;
+            while(ctl->offset.axes > 0 && j < 3) {
+                if (ctl->offset.axes & (1 << j))
+                    ctl->offset.offsets |= spi_read_reg(ADD_REG_OFF_X + j) << (j * 8);
+                ctl->offset.axes &= ~(1 << j);
+                j++;
+            }
+            return 0;
+        }
+        default:
+            return -ENOSYS;
+    }
 }
 
 int16_t SPILIS3DSHDriver::_doReadAxis() {

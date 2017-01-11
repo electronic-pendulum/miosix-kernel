@@ -33,12 +33,16 @@
 #include <filesystem/stringpart.h>
 #include <filesystem/file_access.h>
 #include <kernel/sync.h>
+#include <miosix/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery/drivers/stm32f4_lis3dsh.h>
 
 using namespace miosix;
 
-//best value to have precision and speed, it was found in experimentally way 
-static const unsigned int DELAY = 30; // ms
+static const int8_t OFF_Y = 10;
+static const int8_t OFF_X = 15;
+static const int8_t OFF_Z = 0;
 
+//best value to have precision and speed, it was found in experimentally way
+static const unsigned int DELAY = 30; // ms
 int main()
 {
     LengthCalculator calculator;
@@ -50,8 +54,15 @@ int main()
         for (;;);
     }
 
-    int8_t axis = 1;
-    accelFile->write(&axis, 1); //set y as axis
+    SPILIS3DSHDriver::Ioctl ctl;
+    ctl.axis_select.axis = SPILIS3DSHDriver::Y;
+    accelFile->ioctl(SPILIS3DSHDriver::AXIS_SELECT, &ctl);
+
+    ctl.offset.axes = SPILIS3DSHDriver::X | SPILIS3DSHDriver::Y | SPILIS3DSHDriver::Z;
+    ctl.offset.X = OFF_X;
+    ctl.offset.Y = OFF_Y;
+    ctl.offset.Z = OFF_Z;
+    accelFile->ioctl(SPILIS3DSHDriver::OFFSETS_WRITE, &ctl);
 
     int16_t value;
     double previousLength, length;
@@ -59,13 +70,13 @@ int main()
 
     //loop that retrieves value of acceleroemer every 1 ms and prints the length calculated
     for(;;) {
-        Thread::sleep(DELAY);
-        accelFile->read(&value, 2);
-        length = calculator.getLength(value, getTick());
-        if (length != previousLength) {
-            printf("Last length read: %f\n", length);
-            previousLength = length;
-        }
+      Thread::sleep(DELAY);
+      accelFile->read(&value, 2);
+      length = calculator.getLength(value, getTick());
+      if (length != previousLength) {
+          printf("Last length read: %f\n", length);
+          previousLength = length;
+      }
     }
 
 }
