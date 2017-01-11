@@ -93,7 +93,7 @@ double LengthCalculator::calculateTheta() {
     //0 is the vertical position
     //the purpose of min is avoid NaN result of asin
     //we don't need information about the side of the ependulum, for that reason we use abs
-    return 90.0 - asin(std::min(1.0, std::abs((double) minY / (SCALE * G)))) / M_PI * 180;
+    return M_PI / 2 - asin(std::min(1.0, std::abs(minY / (SCALE * G))));
 }
 
 //calculate the current period (not yet finished)
