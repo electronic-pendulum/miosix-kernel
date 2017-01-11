@@ -26,7 +26,7 @@
  *   along with this program; if not, see <http://www.gnu.org/licenses/>   *
  ***************************************************************************/
 
- #ifndef LENGTHCALCULATOR_H
+#ifndef LENGTHCALCULATOR_H
 #define LENGTHCALCULATOR_H
 
 #include "miosix.h"
@@ -44,13 +44,15 @@ private:
     int calculatePeriod();
 
 private:
+    const double ALPHA_ANGLE = 0.5; //low pass filter factor for angle
+    const double ALPHA_LENGTH = 0.8; //low pass filter factor for length
     const int SCALE = 100;
     const double G = 9.81;
 
     double lastLength;
     bool decrementingY;
-    int previousY;
-    int minY;
+    double previousY;
+    double minY;
     long long zeroTime;
     long long previousTime;
 };

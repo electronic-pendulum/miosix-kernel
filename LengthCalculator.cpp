@@ -50,7 +50,8 @@ LengthCalculator::~LengthCalculator() {
 * it wants acceleromenter value of y and time in ms
 **/
 double LengthCalculator::getLength(int accY, int now) {
-  int absAccY = std::abs(accY);
+  //low pass filter
+  double absAccY = ALPHA_ANGLE * std::abs(accY) + (1 - ALPHA_ANGLE) * previousY;
 
   //is decrementing
   if (absAccY < previousY) {
@@ -82,7 +83,9 @@ double LengthCalculator::getLength(int accY, int now) {
 void LengthCalculator::calculateLength(int period, double theta) {
     //period is in ms
     //this is the inverse of the pendulum serie approximated to the second term
-    lastLength = G * pow(period / 1000.0, 2.0)/(4 * pow(M_PI, 2) * pow((1 + pow(theta, 2) / 16), 2));
+    double tmpLength = G * pow(period / 1000.0, 2.0)/(4 * pow(M_PI, 2) * pow((1 + pow(theta, 2) / 16), 2));
+    //low pass filter
+    lastLength = tmpLength * ALPHA_LENGTH + (1 - ALPHA_LENGTH) * lastLength;
 }
 
 //calculate the max theta of the current period
