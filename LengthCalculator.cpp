@@ -49,7 +49,7 @@ LengthCalculator::~LengthCalculator() {
 * return the last leght calculated
 * it wants acceleromenter value of y and time in ms
 **/
-double LengthCalculator::getLength(int accY, int now) {
+double LengthCalculator::getLength(int accY, long long now) {
   //low pass filter
   double absAccY = ALPHA_ANGLE * std::abs(accY) + (1 - ALPHA_ANGLE) * previousY;
 
@@ -60,7 +60,7 @@ double LengthCalculator::getLength(int accY, int now) {
       * we have done a quarter of period and we are able to caclulate length
       **/
       if (!decrementingY) {
-          int period = calculatePeriod(now);
+          int period = calculatePeriod();
           double theta = calculateTheta();
           calculateLength(period, theta);
       }
