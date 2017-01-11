@@ -84,8 +84,11 @@ void LengthCalculator::calculateLength(int period, double theta) {
     //period is in ms
     //this is the inverse of the pendulum serie approximated to the second term
     double tmpLength = G * pow(period / 1000.0, 2.0)/(4 * pow(M_PI, 2) * pow((1 + pow(theta, 2) / 16), 2));
-    //low pass filter
-    lastLength = tmpLength * ALPHA_LENGTH + (1 - ALPHA_LENGTH) * lastLength;
+    //thresholds to exclude small changes
+    if (tmpLength >= LENGTH_THRESHOLD && theta > ANGLE_THRESHOLD) {
+      //low pass filter
+      lastLength = tmpLength * ALPHA_LENGTH + (1 - ALPHA_LENGTH) * lastLength;
+    }
 }
 
 //calculate the max theta of the current period

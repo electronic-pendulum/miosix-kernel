@@ -46,6 +46,8 @@ private:
 private:
     const double ALPHA_ANGLE = 0.5; //low pass filter factor for angle
     const double ALPHA_LENGTH = 0.8; //low pass filter factor for length
+    const double LENGTH_THRESHOLD = 0.1;
+    const double ANGLE_THRESHOLD = 0.4; // 23°
     const int SCALE = 100;
     const double G = 9.81;
 
