@@ -34,8 +34,6 @@
 class LengthCalculator {
 public:
     LengthCalculator();
-    LengthCalculator(const LengthCalculator& orig);
-    virtual ~LengthCalculator();
     double getLength(int acc, long long now);
 
 private:

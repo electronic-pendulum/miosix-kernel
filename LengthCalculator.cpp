@@ -36,15 +36,6 @@ LengthCalculator::LengthCalculator() :
     zeroTime(0), previousTime(0) {
 }
 
-LengthCalculator::LengthCalculator(const LengthCalculator& orig) {
-    this->previousY = orig.previousY;
-    this->minY = orig.minY;
-    this->lastLength = orig.lastLength;
-}
-
-LengthCalculator::~LengthCalculator() {
-}
-
 /**
 * return the last leght calculated
 * it wants acceleromenter value of y and time in ms
