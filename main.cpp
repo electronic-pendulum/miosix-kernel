@@ -65,7 +65,7 @@ int main()
     accelFile->ioctl(SPILIS3DSHDriver::OFFSETS_WRITE, &ctl);
 
     int16_t value;
-    double previousLength, length;
+    float previousLength, length;
     previousLength = -1.0;
 
     //loop that retrieves value of acceleroemer every 1 ms and prints the length calculated

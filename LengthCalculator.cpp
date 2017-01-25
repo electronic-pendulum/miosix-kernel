@@ -40,9 +40,9 @@ LengthCalculator::LengthCalculator() :
 * return the last leght calculated
 * it wants acceleromenter value of y and time in ms
 **/
-double LengthCalculator::getLength(int accY, long long now) {
+float LengthCalculator::getLength(int accY, long long now) {
   //low pass filter
-  double absAccY = ALPHA_ANGLE * std::abs(accY) + (1 - ALPHA_ANGLE) * previousY;
+  float absAccY = ALPHA_ANGLE * std::abs(accY) + (1 - ALPHA_ANGLE) * previousY;
 
   //is decrementing
   if (absAccY < previousY) {
@@ -52,7 +52,7 @@ double LengthCalculator::getLength(int accY, long long now) {
       **/
       if (!decrementingY) {
           int period = calculatePeriod();
-          double theta = calculateTheta();
+          float theta = calculateTheta();
           calculateLength(period, theta);
       }
       minY = absAccY;
@@ -71,10 +71,10 @@ double LengthCalculator::getLength(int accY, long long now) {
 /* PRIVATE METHODS */
 
 //calculate length of the pendulum and set in the private property
-void LengthCalculator::calculateLength(int period, double theta) {
+void LengthCalculator::calculateLength(int period, float theta) {
     //period is in ms
     //this is the inverse of the pendulum serie approximated to the second term
-    double tmpLength = G * pow(period / 1000.0, 2.0)/(4 * pow(M_PI, 2) * pow((1 + pow(theta, 2) / 16), 2));
+    float tmpLength = G * pow(period / 1000.0, 2.0)/(4 * pow(M_PI, 2) * pow((1 + pow(theta, 2) / 16), 2));
     //thresholds to exclude small changes
     if (tmpLength >= LENGTH_THRESHOLD && theta > ANGLE_THRESHOLD) {
       //low pass filter
@@ -83,11 +83,11 @@ void LengthCalculator::calculateLength(int period, double theta) {
 }
 
 //calculate the max theta of the current period
-double LengthCalculator::calculateTheta() {
+float LengthCalculator::calculateTheta() {
     //0 is the vertical position
     //the purpose of min is avoid NaN result of asin
     //we don't need information about the side of the ependulum, for that reason we use abs
-    return M_PI / 2 - asin(std::min(1.0, std::abs(minY / (SCALE * G))));
+    return M_PI / 2 - asin(std::min((float) 1.0, std::abs(minY / (SCALE * G))));
 }
 
 //calculate the current period (not yet finished)

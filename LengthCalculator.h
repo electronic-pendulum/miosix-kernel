@@ -34,25 +34,25 @@
 class LengthCalculator {
 public:
     LengthCalculator();
-    double getLength(int acc, long long now);
+    float getLength(int acc, long long now);
 
 private:
-    void calculateLength(int period, double theta);
-    double calculateTheta();
+    void calculateLength(int period, float theta);
+    float calculateTheta();
     int calculatePeriod();
 
 private:
-    const double ALPHA_ANGLE = 0.5; //low pass filter factor for angle
-    const double ALPHA_LENGTH = 0.8; //low pass filter factor for length
-    const double LENGTH_THRESHOLD = 0.1;
-    const double ANGLE_THRESHOLD = 0.4; // 23°
+    const float ALPHA_ANGLE = 0.5; //low pass filter factor for angle
+    const float ALPHA_LENGTH = 0.8; //low pass filter factor for length
+    const float LENGTH_THRESHOLD = 0.1;
+    const float ANGLE_THRESHOLD = 0.4; // 23°
     const int SCALE = 100;
-    const double G = 9.81;
+    const float G = 9.81;
 
-    double lastLength;
+    float lastLength;
     bool decrementingY;
-    double previousY;
-    double minY;
+    float previousY;
+    float minY;
     long long zeroTime;
     long long previousTime;
 };
